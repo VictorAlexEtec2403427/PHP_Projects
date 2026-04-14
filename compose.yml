@@ -1,0 +1,14 @@
+services:
+  terminal:
+    container_name: alpine_linux
+    image: alpine:latest
+    stdin_open: true 
+    tty: true
+    ports:
+      - "27:22"
+    volumes:
+      # Vamos montar a pasta direto no /home para facilitar
+      - ./dates:/home:z 
+    working_dir: /home
+    # Comando simplificado: entra na pasta e roda o script
+    command: /bin/sh -c "chmod +x /home/setup.sh && /home/setup.sh && /bin/sh"
