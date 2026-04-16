@@ -1,14 +1,48 @@
 services:
+  # Sua Central de Controle (Terminal)
   terminal:
     container_name: alpine_linux
     image: alpine:latest
     stdin_open: true 
     tty: true
     ports:
-      - "27:22"
+      - "27:22" # Acesso SSH se precisar futuramente
     volumes:
-      # Vamos montar a pasta direto no /home para facilitar
-      - ./dates:/home:z 
+      - ./dates:/home:z # Onde ficam seus scripts e projetos
     working_dir: /home
-    # Comando simplificado: entra na pasta e roda o script
+    # Mantém o terminal vivo e executa seu script de setup
     command: /bin/sh -c "chmod +x /home/setup.sh && /home/setup.sh && /bin/sh"
+    networks:
+      - escola_network
+
+  # Banco de Dados (Serviço de Apoio)
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: escola_db
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - escola_network
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Interface do Banco (Serviço de Apoio)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin_gui
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - escola_network
+
+networks:
+  escola_network:
+    driver: bridge
+
+volumes:
+  db_data:
